@@ -1,4 +1,4 @@
-name: Save Output to Another Repo
+name: Save Output Folder to Another Repo
 
 on:
   push:
@@ -9,13 +9,16 @@ jobs:
   save_output:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo-A
+      - name: Checkout Repo-A
         uses: actions/checkout@v3
 
-      - name: Generate an output file
-        run: echo "Generated at $(date)" > output.txt
+      - name: Generate an output folder with files
+        run: |
+          mkdir -p output_folder
+          echo "Generated at $(date)" > output_folder/output.txt
+          echo "Additional log file" > output_folder/log.txt
 
-      - name: Push output to Repo-B
+      - name: Push output folder to Repo-B
         env:
           REPO_B_PAT: ${{ secrets.REPO_B_PAT }}
         run: |
@@ -28,10 +31,10 @@ jobs:
           # Move into Repo-B directory
           cd Repo-B
 
-          # Move output file into Repo-B
-          mv ../output.txt .
+          # Copy the output folder from Repo-A to Repo-B
+          cp -r ../output_folder .
 
           # Commit and push changes
-          git add output.txt
-          git commit -m "Updated output from repo-A"
+          git add output_folder
+          git commit -m "Updated output folder from Repo-A"
           git push origin main
