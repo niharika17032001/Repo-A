@@ -1,0 +1,37 @@
+name: Save Output to Another Repo
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  save_output:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo-A
+        uses: actions/checkout@v3
+
+      - name: Generate an output file
+        run: echo "Generated at $(date)" > output.txt
+
+      - name: Push output to repo-B
+        env:
+          REPO_B_PAT: ${{ secrets.REPO_B_PAT }}
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+          # Clone repo-B using the PAT token
+          git clone https://x-access-token:${REPO_B_PAT}@github.com/niharika17032001/Repo-B.git
+
+          # Move into repo-B directory
+          cd repo-B
+
+          # Move output file into repo-B
+          mv ../output.txt .
+
+          # Commit and push changes
+          git add output.txt
+          git commit -m "Updated output from repo-A"
+          git push origin main
